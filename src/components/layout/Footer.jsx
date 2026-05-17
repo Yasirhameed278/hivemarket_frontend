@@ -3,15 +3,15 @@ import { Link } from 'react-router-dom';
 import { Package, Mail, Twitter, Instagram, Github, Heart, ArrowRight, MapPin, Phone, Zap, Shield, Truck, RotateCcw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const SHOP_LINKS = [['All Products', '/products'], ['Electronics', '/products?category=Electronics'], ['Clothing', '/products?category=Clothing'], ['Sports', '/products?category=Sports'], ['Home & Living', '/products?category=Home']];
+const SHOP_LINKS = [['All Products', '/products'], ['Stores', '/stores'], ['Electronics', '/products?category=Electronics'], ['Clothing', '/products?category=Clothing'], ['Sports', '/products?category=Sports']];
 const ACCOUNT_LINKS = [['My Orders', '/orders'], ['Wishlist', '/wishlist'], ['Profile', '/profile'], ['Shopping Cart', '/cart']];
 const SUPPORT_LINKS = [['FAQ', '#'], ['Shipping Info', '#'], ['Returns & Refunds', '#'], ['Contact Us', '#'], ['Size Guide', '#']];
 
 const FEATURES = [
-  { icon: Truck, label: 'Free Shipping', sublabel: 'Orders over $100', color: 'text-blue-400' },
-  { icon: Shield, label: 'Secure Payments', sublabel: '256-bit SSL', color: 'text-green-400' },
+  { icon: Truck, label: 'Free Shipping', sublabel: 'Orders over Rs. 28,000', color: 'text-blue-400' },
+  { icon: Shield, label: 'Secure Payments', sublabel: '256-bit SSL encrypted', color: 'text-green-400' },
   { icon: RotateCcw, label: '30-Day Returns', sublabel: 'No questions asked', color: 'text-purple-400' },
-  { icon: Zap, label: 'Fast Delivery', sublabel: '1-2 business days', color: 'text-amber-400' },
+  { icon: Zap, label: 'Nationwide Delivery', sublabel: 'Across all of Pakistan', color: 'text-amber-400' },
 ];
 
 export default function Footer() {

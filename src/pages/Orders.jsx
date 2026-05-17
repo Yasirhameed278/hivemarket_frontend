@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, ChevronRight, Clock, CheckCircle, Truck, XCircle } from 'lucide-react';
+import { Package, ChevronRight, Clock, CheckCircle, Truck, XCircle, ShoppingBag } from 'lucide-react';
 import api from '../api';
 import { PageLoader } from '../components/ui/Loader';
+import { formatPKR } from '../utils/currency';
 
 const STATUS_CONFIG = {
   pending:    { color: 'bg-yellow-100 text-yellow-700', icon: Clock, label: 'Pending' },
@@ -29,13 +30,18 @@ export default function Orders() {
         <h1 className="font-display text-2xl font-bold text-gray-900 mb-8">My Orders</h1>
 
         {orders.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Package className="w-9 h-9 text-gray-400" />
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="relative mb-6">
+              <div className="w-24 h-24 bg-gradient-to-br from-brand-50 to-orange-50 rounded-3xl flex items-center justify-center shadow-inner border border-brand-100/50">
+                <ShoppingBag className="w-11 h-11 text-brand-300" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-brand-500 to-orange-400 rounded-full flex items-center justify-center shadow-glow">
+                <span className="text-white text-[10px] font-bold">0</span>
+              </div>
             </div>
-            <h3 className="font-semibold text-gray-900 mb-2">No orders yet</h3>
-            <p className="text-gray-400 text-sm mb-6">Looks like you haven't placed any orders.</p>
-            <Link to="/products" className="btn-primary px-8 py-3">Start Shopping</Link>
+            <h3 className="font-display text-xl font-bold text-gray-900 mb-2">No orders yet</h3>
+            <p className="text-gray-400 text-sm mb-8 max-w-xs">You haven't placed any orders. Explore our products and find something you love!</p>
+            <Link to="/products" className="btn-primary px-8 py-3 rounded-2xl shadow-glow">Start Shopping</Link>
           </div>
         ) : (
           <div className="space-y-4">
@@ -72,7 +78,7 @@ export default function Orders() {
                   </div>
 
                   <div className="flex items-center gap-4 sm:flex-col sm:items-end">
-                    <span className="font-bold text-gray-900">${order.totalPrice?.toFixed(2)}</span>
+                    <span className="font-bold text-gray-900">{formatPKR(order.totalPrice)}</span>
                     <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-brand-500 group-hover:translate-x-1 transition-all" />
                   </div>
                 </Link>

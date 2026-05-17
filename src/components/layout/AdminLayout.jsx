@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Package, ShoppingBag, Users, Menu, X,
-  LogOut, ChevronRight, Bell, Settings, TrendingUp, CheckCheck
+  LogOut, ChevronRight, Bell, TrendingUp, CheckCheck, Tag, Store
 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import api from '../../api';
@@ -13,6 +13,8 @@ const navItems = [
   { path: '/admin/products', icon: Package, label: 'Products' },
   { path: '/admin/orders', icon: ShoppingBag, label: 'Orders' },
   { path: '/admin/users', icon: Users, label: 'Users' },
+  { path: '/admin/coupons', icon: Tag, label: 'Coupons' },
+  { path: '/admin/vendors', icon: Store, label: 'Vendors' },
 ];
 
 const STATUS_COLORS = {

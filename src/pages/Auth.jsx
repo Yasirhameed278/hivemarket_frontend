@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import useAuthStore from '../store/authStore';
 import useCartStore from '../store/cartStore';
 import useWishlistStore from '../store/wishlistStore';
+import api from '../api';
 
 const PERKS = [
   [Truck,        'Free delivery on orders over Rs. 28,000', 'text-orange-200'],
@@ -135,7 +136,18 @@ export function Login() {
       const data = await login(form.email, form.password);
       await Promise.all([fetchCart(), fetchWishlist()]);
       toast.success(`Welcome back, ${data.user.name.split(' ')[0]}!`);
-      navigate(data.user.role === 'admin' ? '/admin' : '/');
+
+      if (data.user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        // Check if this user is an approved vendor
+        try {
+          const { data: vendor } = await api.get('/vendors/me/profile');
+          navigate(vendor?.status === 'approved' ? '/vendor' : '/');
+        } catch {
+          navigate('/');
+        }
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed');
     } finally { setLoading(false); }

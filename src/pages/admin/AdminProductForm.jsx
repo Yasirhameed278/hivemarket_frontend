@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Save, ArrowLeft, Upload, X, Plus, Globe, Tag, Package } from 'lucide-react';
+import { Save, ArrowLeft, Upload, X, Plus, Globe, Tag, Zap } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../api';
 
@@ -12,6 +12,7 @@ const DEFAULT = {
   isFeatured: false, isActive: true,
   seoTitle: '', seoDescription: '', seoKeywords: '',
   tags: '', weight: '',
+  salePrice: '', saleEndsAt: '',
 };
 
 export default function AdminProductForm() {
@@ -40,6 +41,8 @@ export default function AdminProductForm() {
         seoTitle: data.seoTitle || '', seoDescription: data.seoDescription || '',
         seoKeywords: (data.seoKeywords || []).join(', '),
         tags: (data.tags || []).join(', '), weight: data.weight || '',
+        salePrice: data.salePrice || '',
+        saleEndsAt: data.saleEndsAt ? data.saleEndsAt.slice(0, 16) : '',
       });
       setExistingImages(data.images || []);
       setVariants(data.variants || []);
@@ -168,6 +171,46 @@ export default function AdminProductForm() {
                   className="w-4 h-4 rounded accent-brand-500" />
                 <span className="text-sm font-medium text-gray-700">Active (visible)</span>
               </label>
+            </div>
+
+            {/* Flash Sale */}
+            <div className="border border-red-100 bg-red-50/50 rounded-2xl p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-red-500" />
+                <h4 className="text-sm font-semibold text-red-700">Flash Sale</h4>
+                <span className="text-xs text-red-400 ml-1">— leave empty to disable</span>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="label">Sale Price (PKR)</label>
+                  <input
+                    type="number" min="0" step="0.01"
+                    value={form.salePrice}
+                    onChange={(e) => set('salePrice', e.target.value)}
+                    placeholder="e.g. 1499"
+                    className="input"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">Must be lower than regular price</p>
+                </div>
+                <div>
+                  <label className="label">Sale Ends At</label>
+                  <input
+                    type="datetime-local"
+                    value={form.saleEndsAt}
+                    onChange={(e) => set('saleEndsAt', e.target.value)}
+                    className="input"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">Countdown timer stops when expired</p>
+                </div>
+              </div>
+              {form.salePrice && form.saleEndsAt && (
+                <p className="text-xs text-red-600 font-medium">
+                  ⚡ Flash sale active — product will show sale price with countdown timer
+                </p>
+              )}
+              {form.salePrice && !form.saleEndsAt && (
+                <p className="text-xs text-amber-600">Set an end date/time for the countdown timer to appear</p>
+              )}
             </div>
           </div>
         )}

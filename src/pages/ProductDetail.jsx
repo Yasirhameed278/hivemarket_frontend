@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Heart, ShoppingCart, Star, Truck, Shield, RotateCcw, ChevronRight, Minus, Plus, Share2 } from 'lucide-react';
+import { Heart, ShoppingCart, Star, Truck, Shield, RotateCcw, ChevronRight, Minus, Plus, Share2, Zap, Store } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../api';
 import { PageLoader } from '../components/ui/Loader';
 import StarRating from '../components/StarRating';
 import ProductCard from '../components/product/ProductCard';
+import CountdownTimer from '../components/ui/CountdownTimer';
 import useAuthStore from '../store/authStore';
 import useCartStore from '../store/cartStore';
 import useWishlistStore from '../store/wishlistStore';
@@ -77,7 +78,12 @@ export default function ProductDetail() {
   if (!product) return null;
 
   const images = product.images?.length ? product.images : [product.thumbnail || 'https://via.placeholder.com/500'];
-  const discount = product.comparePrice > product.price ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100) : 0;
+  const onSale = product.onSale && product.salePrice > 0;
+  const displayPrice = onSale ? product.salePrice : product.price;
+  const saleDiscount = onSale ? Math.round(((product.price - product.salePrice) / product.price) * 100) : 0;
+  const compareDiscount = !onSale && product.comparePrice > product.price
+    ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)
+    : 0;
   const wishlisted = isWishlisted(product._id);
 
   return (
@@ -100,7 +106,8 @@ export default function ProductDetail() {
             <div className="relative rounded-2xl overflow-hidden bg-gray-50 aspect-square mb-3">
               <img src={images[activeImage]} alt={product.name}
                 className="w-full h-full object-cover transition-all duration-300" />
-              {discount > 0 && <span className="absolute top-4 left-4 badge bg-red-500 text-white font-bold">-{discount}%</span>}
+              {onSale && <span className="absolute top-4 left-4 badge bg-red-600 text-white font-bold animate-pulse">⚡ -{saleDiscount}%</span>}
+              {!onSale && compareDiscount > 0 && <span className="absolute top-4 left-4 badge bg-red-500 text-white font-bold">-{compareDiscount}%</span>}
               <button onClick={handleWishlist}
                 className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all ${wishlisted ? 'bg-red-500 text-white' : 'bg-white text-gray-500 hover:text-red-500'}`}>
                 <Heart className={`w-4 h-4 ${wishlisted ? 'fill-white' : ''}`} />
@@ -138,16 +145,52 @@ export default function ProductDetail() {
               <span className="text-xs text-gray-400">{product.soldCount} sold</span>
             </div>
 
+            {/* Flash sale banner */}
+            {onSale && product.saleEndsAt && (
+              <div className="mb-4 bg-gradient-to-r from-red-600 to-orange-500 rounded-2xl px-4 py-3 flex items-center justify-between gap-4 shadow-lg shadow-red-500/20">
+                <div className="flex items-center gap-2 text-white">
+                  <Zap className="w-4 h-4 shrink-0" strokeWidth={2.5} />
+                  <span className="text-sm font-bold uppercase tracking-wide">Flash Sale</span>
+                </div>
+                <CountdownTimer endsAt={product.saleEndsAt} onExpire={() => window.location.reload()} />
+              </div>
+            )}
+
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-6">
-              <span className="text-4xl font-bold text-gray-900">{formatPKR(product.price)}</span>
-              {discount > 0 && <>
-                <span className="text-xl text-gray-400 line-through">{formatPKR(product.comparePrice)}</span>
-                <span className="badge bg-red-100 text-red-600 font-bold">Save {discount}%</span>
-              </>}
+              <span className={`text-4xl font-bold ${onSale ? 'text-red-600' : 'text-gray-900'}`}>
+                {formatPKR(displayPrice)}
+              </span>
+              {onSale && (
+                <>
+                  <span className="text-xl text-gray-400 line-through">{formatPKR(product.price)}</span>
+                  <span className="badge bg-red-100 text-red-600 font-bold">Save {saleDiscount}%</span>
+                </>
+              )}
+              {!onSale && compareDiscount > 0 && (
+                <>
+                  <span className="text-xl text-gray-400 line-through">{formatPKR(product.comparePrice)}</span>
+                  <span className="badge bg-red-100 text-red-600 font-bold">Save {compareDiscount}%</span>
+                </>
+              )}
             </div>
 
-            <p className="text-gray-600 text-sm leading-relaxed mb-6">{product.shortDescription || product.description?.substring(0, 200)}</p>
+            <p className="text-gray-600 text-sm leading-relaxed mb-4">{product.shortDescription || product.description?.substring(0, 200)}</p>
+
+            {/* Sold by */}
+            {product.vendor && (
+              <Link to={`/vendors/${product.vendor._id}`}
+                className="inline-flex items-center gap-2 mb-5 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 hover:border-brand-300 hover:bg-brand-50 transition-all group">
+                {product.vendor.logo ? (
+                  <img src={product.vendor.logo} alt={product.vendor.storeName} className="w-6 h-6 rounded-lg object-cover" />
+                ) : (
+                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-brand-500 to-orange-400 flex items-center justify-center">
+                    <Store className="w-3 h-3 text-white" />
+                  </div>
+                )}
+                <span className="text-xs text-gray-500">Sold by <span className="font-semibold text-gray-800 group-hover:text-brand-600 transition-colors">{product.vendor.storeName}</span></span>
+              </Link>
+            )}
 
             {/* Variants */}
             {product.variants?.map((variant) => (

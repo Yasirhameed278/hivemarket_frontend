@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, Heart, User, Menu, X, Search, Package, LogOut, LayoutDashboard, ChevronDown, Sparkles, Bell } from 'lucide-react';
+import { ShoppingCart, Heart, User, Menu, X, Search, Package, LogOut, LayoutDashboard, ChevronDown, Sparkles, Bell, Store } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import useCartStore from '../../store/cartStore';
 import useWishlistStore from '../../store/wishlistStore';
 import api from '../../api';
 import { formatPKR } from '../../utils/currency';
 
-const NAV_LINKS = [['/', 'Home'], ['/products', 'Products'], ['/products?category=Electronics', 'Electronics'], ['/products?category=Clothing', 'Fashion']];
+const NAV_LINKS = [['/', 'Home'], ['/products', 'Products'], ['/stores', 'Stores'], ['/products?category=Electronics', 'Electronics']];
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -23,6 +23,7 @@ export default function Navbar() {
   const [searchResults, setSearchResults] = useState([]);
   const [scrolled, setScrolled] = useState(false);
   const [announcementVisible, setAnnouncementVisible] = useState(true);
+  const [vendorStatus, setVendorStatus] = useState(null);
   const searchRef = useRef(null);
   const debounceRef = useRef(null);
 
@@ -31,6 +32,13 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn()) return;
+    api.get('/vendors/me/profile')
+      .then(({ data }) => setVendorStatus(data?.status || null))
+      .catch(() => setVendorStatus(null));
+  }, [user]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -232,6 +240,8 @@ export default function Navbar() {
                         ['/profile', <User className="w-4 h-4" />, 'Profile', 'text-blue-500 bg-blue-50'],
                         ['/orders', <Package className="w-4 h-4" />, 'My Orders', 'text-purple-500 bg-purple-50'],
                         ['/wishlist', <Heart className="w-4 h-4" />, 'Wishlist', 'text-red-500 bg-red-50'],
+                        ...(vendorStatus === 'approved' ? [['/vendor', <Store className="w-4 h-4" />, 'Vendor Dashboard', 'text-amber-600 bg-amber-50']] : []),
+                        ...(!vendorStatus && !isAdmin() ? [['/become-vendor', <Store className="w-4 h-4" />, 'Become a Vendor', 'text-green-600 bg-green-50']] : []),
                         ...(isAdmin() ? [['/admin', <LayoutDashboard className="w-4 h-4" />, 'Admin Dashboard', 'text-brand-500 bg-brand-50']] : []),
                       ].map(([path, icon, label, iconColor]) => (
                         <Link key={path} to={path}

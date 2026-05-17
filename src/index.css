@@ -50,7 +50,17 @@
 
   /* Skeleton loader */
   .skeleton {
-    @apply bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:1000px_100%] animate-shimmer rounded-lg;
+    @apply bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 bg-[length:800px_100%] animate-shimmer rounded-lg;
+  }
+
+  /* Hover lift utility */
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover;
+  }
+
+  /* Surface panel (light inset) */
+  .surface {
+    @apply bg-gray-50/80 rounded-2xl border border-gray-100;
   }
 
   /* Scrollbar */

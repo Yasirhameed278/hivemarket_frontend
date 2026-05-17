@@ -6,6 +6,7 @@ import useAuthStore from '../../store/authStore';
 import useCartStore from '../../store/cartStore';
 import useWishlistStore from '../../store/wishlistStore';
 import { formatPKR } from '../../utils/currency';
+import CountdownTimer from '../ui/CountdownTimer';
 
 export default function ProductCard({ product }) {
   const { isLoggedIn } = useAuthStore();
@@ -15,7 +16,12 @@ export default function ProductCard({ product }) {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const wishlisted = isWishlisted(product._id);
-  const discount = product.comparePrice > product.price
+  const onSale = product.onSale && product.salePrice > 0;
+  const displayPrice = onSale ? product.salePrice : product.price;
+  const saleDiscount = onSale
+    ? Math.round(((product.price - product.salePrice) / product.price) * 100)
+    : 0;
+  const discount = !onSale && product.comparePrice > product.price
     ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)
     : 0;
 
@@ -65,7 +71,12 @@ export default function ProductCard({ product }) {
 
         {/* Badges */}
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
-          {discount > 0 && (
+          {onSale && (
+            <span className="badge bg-red-600 text-white text-[10px] font-bold shadow-sm animate-pulse">
+              ⚡ SALE -{saleDiscount}%
+            </span>
+          )}
+          {!onSale && discount > 0 && (
             <span className="badge bg-red-500 text-white text-[10px] font-bold shadow-sm">
               -{discount}%
             </span>
@@ -140,15 +151,27 @@ export default function ProductCard({ product }) {
 
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-base font-bold text-gray-900">{formatPKR(product.price)}</span>
-            {discount > 0 && (
+            <span className={`text-base font-bold ${onSale ? 'text-red-600' : 'text-gray-900'}`}>
+              {formatPKR(displayPrice)}
+            </span>
+            {onSale && (
+              <span className="text-xs text-gray-400 line-through">{formatPKR(product.price)}</span>
+            )}
+            {!onSale && discount > 0 && (
               <span className="text-xs text-gray-400 line-through">{formatPKR(product.comparePrice)}</span>
             )}
           </div>
-          {product.brand && (
+          {product.soldCount > 0 ? (
+            <span className="text-[10px] text-gray-400 font-medium">{product.soldCount > 999 ? `${(product.soldCount/1000).toFixed(1)}k` : product.soldCount} sold</span>
+          ) : product.brand ? (
             <span className="text-[10px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded-lg border border-gray-100 font-medium">{product.brand}</span>
-          )}
+          ) : null}
         </div>
+        {onSale && product.saleEndsAt && (
+          <div className="mt-1.5">
+            <CountdownTimer endsAt={product.saleEndsAt} compact />
+          </div>
+        )}
       </div>
 
       {/* Bottom color accent on hover */}

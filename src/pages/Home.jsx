@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Truck, Shield, RotateCcw, Star, Zap, TrendingUp, ChevronRight, Sparkles, Play, CheckCircle, Search } from 'lucide-react';
+import { ArrowRight, Truck, Shield, RotateCcw, Star, Zap, TrendingUp, ChevronRight, Sparkles, Play, CheckCircle, Search, Store, Package, ShieldCheck } from 'lucide-react';
 import api from '../api';
 import ProductCard from '../components/product/ProductCard';
 import { SkeletonCard } from '../components/ui/Loader';
@@ -49,6 +49,7 @@ export default function Home() {
   const navigate = useNavigate();
   const [featured, setFeatured] = useState([]);
   const [trending, setTrending] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('featured');
@@ -56,12 +57,14 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [featRes, trendRes] = await Promise.all([
+        const [featRes, trendRes, vendorRes] = await Promise.all([
           api.get('/products?featured=true&limit=8'),
           api.get('/products?sort=popular&limit=8'),
+          api.get('/vendors?limit=6'),
         ]);
         setFeatured(featRes.data.products);
         setTrending(trendRes.data.products);
+        setVendors(vendorRes.data.vendors || []);
       } catch {}
       setLoading(false);
     };
@@ -304,6 +307,60 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Vendor Stores */}
+      {vendors.length > 0 && (
+        <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="w-8 h-0.5 bg-brand-500 rounded-full" />
+                <p className="text-brand-500 text-sm font-semibold uppercase tracking-widest">Marketplace</p>
+              </div>
+              <h2 className="section-title text-3xl">Our Sellers</h2>
+            </div>
+            <Link to="/stores" className="flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-brand-500 transition-colors group">
+              View all stores <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {vendors.map(v => (
+              <Link key={v._id} to={`/vendors/${v._id}`}
+                className="group bg-white rounded-2xl border border-gray-200 hover:border-brand-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden flex items-center gap-4 p-4">
+                {v.logo ? (
+                  <img src={v.logo} alt={v.storeName}
+                    className="w-14 h-14 rounded-xl object-cover border border-gray-100 shrink-0" />
+                ) : (
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500 to-orange-400 flex items-center justify-center shrink-0">
+                    <Store className="w-6 h-6 text-white" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <p className="font-semibold text-gray-900 truncate group-hover:text-brand-600 transition-colors text-sm">
+                      {v.storeName}
+                    </p>
+                    <ShieldCheck className="w-3.5 h-3.5 text-green-500 shrink-0" />
+                  </div>
+                  <p className="text-xs text-gray-400 line-clamp-1 mb-1.5">{v.description || 'Verified HiveMarket seller'}</p>
+                  <div className="flex items-center gap-3 text-[11px] text-gray-400">
+                    <span className="flex items-center gap-1"><Package className="w-3 h-3" />{v.productCount || 0} products</span>
+                    <span className="flex items-center gap-1"><TrendingUp className="w-3 h-3" />{v.totalSales || 0} sales</span>
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-brand-500 group-hover:translate-x-0.5 transition-all shrink-0" />
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-6 text-center">
+            <Link to="/stores" className="btn-secondary px-8 py-3 text-sm inline-flex items-center gap-2">
+              <Store className="w-4 h-4" /> Browse All Stores <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* Brands */}
       <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

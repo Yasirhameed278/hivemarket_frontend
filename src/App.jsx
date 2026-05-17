@@ -9,6 +9,7 @@ import useWishlistStore from './store/wishlistStore';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import AdminLayout from './components/layout/AdminLayout';
+import VendorLayout from './components/layout/VendorLayout';
 import Chatbot from './components/Chatbot';
 import Loader from './components/ui/Loader';
 
@@ -31,6 +32,16 @@ const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'));
 const AdminProductForm = lazy(() => import('./pages/admin/AdminProductForm'));
 const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
+const AdminCoupons = lazy(() => import('./pages/admin/AdminCoupons'));
+const AdminVendors = lazy(() => import('./pages/admin/AdminVendors'));
+
+// Vendor pages
+const BecomeVendor = lazy(() => import('./pages/BecomeVendor'));
+const VendorStore = lazy(() => import('./pages/VendorStore'));
+const Stores = lazy(() => import('./pages/Stores'));
+const VendorDashboard = lazy(() => import('./pages/vendor/VendorDashboard'));
+const VendorProducts = lazy(() => import('./pages/vendor/VendorProducts'));
+const VendorOrders = lazy(() => import('./pages/vendor/VendorOrders'));
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { isLoggedIn, isAdmin } = useAuthStore();
@@ -81,6 +92,22 @@ export default function App() {
           <Route path="/orders/:id" element={<MainLayout><ProtectedRoute><OrderDetail /></ProtectedRoute></MainLayout>} />
           <Route path="/wishlist" element={<MainLayout><ProtectedRoute><Wishlist /></ProtectedRoute></MainLayout>} />
 
+          {/* All stores listing */}
+          <Route path="/stores" element={<MainLayout><Stores /></MainLayout>} />
+
+          {/* Vendor public store */}
+          <Route path="/vendors/:id" element={<MainLayout><VendorStore /></MainLayout>} />
+
+          {/* Become a vendor */}
+          <Route path="/become-vendor" element={<MainLayout><BecomeVendor /></MainLayout>} />
+
+          {/* Vendor dashboard (protected — VendorLayout handles its own auth redirect) */}
+          <Route path="/vendor" element={<VendorLayout />}>
+            <Route index element={<VendorDashboard />} />
+            <Route path="products" element={<VendorProducts />} />
+            <Route path="orders" element={<VendorOrders />} />
+          </Route>
+
           {/* Admin routes */}
           <Route path="/admin" element={<ProtectedRoute adminOnly><AdminLayout /></ProtectedRoute>}>
             <Route index element={<AdminDashboard />} />
@@ -89,6 +116,8 @@ export default function App() {
             <Route path="products/:id/edit" element={<AdminProductForm />} />
             <Route path="orders" element={<AdminOrders />} />
             <Route path="users" element={<AdminUsers />} />
+            <Route path="coupons" element={<AdminCoupons />} />
+            <Route path="vendors" element={<AdminVendors />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" />} />
